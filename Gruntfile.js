@@ -13,11 +13,21 @@ module.exports = function(grunt) {
 		},
 		shell: {
 			stylesheets: {
-				command: 'sass <%= paths.scss %>app.scss <%= paths.css %>app.css'
+				command: 'sass --no-source-map <%= paths.scss %>app.scss <%= paths.css %>app.css'
 			},
 			typescript: {
-				command: 'tsc <%= paths.ts %>app.ts --outFile <%= paths.js %>app.js'
+				command: 'tsc --strict --outFile <%= paths.js %>app.js <%= paths.ts %>app.ts'
 			},
+		},
+		postcss: {
+			options: {
+				processors: [
+					require('autoprefixer')()
+				]
+			},
+			dist: {
+				src: '<%= paths.css %>app.css'
+			}
 		},
 		watch: {
 			stylesheets: {
@@ -27,7 +37,7 @@ module.exports = function(grunt) {
 					'<%= paths.scss %>*/*/*.scss',
 					'<%= paths.scss %>*/*/*/*.scss'
 				],
-				tasks: ['shell:stylesheets']
+				tasks: ['shell:stylesheets','postcss']
 			},
 			typescript: {
 				files: [
@@ -41,11 +51,12 @@ module.exports = function(grunt) {
 		}
 	});
 	
+	grunt.loadNpmTasks('grunt-postcss');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-shell');
 	
 	grunt.registerTask('build', [
-		'shell:stylesheets',
+		'shell:stylesheets','postcss',
 		'shell:typescript'
 	]);
 	
